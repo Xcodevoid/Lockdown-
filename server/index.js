@@ -23,14 +23,18 @@ import {
 } from './rooms.js';
 
 const PORT = process.env.PORT || 4000;
-const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
+// Comma-separated list, e.g. "http://localhost:5173,https://your-app.vercel.app"
+const CLIENT_ORIGINS = (process.env.CLIENT_ORIGIN || 'http://localhost:5173')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
 
 const app = express();
-app.use(cors({ origin: CLIENT_ORIGIN }));
+app.use(cors({ origin: CLIENT_ORIGINS }));
 app.get('/health', (req, res) => res.json({ ok: true }));
 
 const httpServer = createServer(app);
-const io = new Server(httpServer, { cors: { origin: CLIENT_ORIGIN } });
+const io = new Server(httpServer, { cors: { origin: CLIENT_ORIGINS } });
 
 function seatContext(socket) {
   const found = findSeatBySocket(socket.id);
