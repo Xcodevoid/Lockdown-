@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react';
 import Home from './components/Home';
 import GameBoard from './components/GameBoard';
 import LanguageToggle from './components/LanguageToggle';
+import ConnectingScreen from './components/ConnectingScreen';
+import ToastHost from './components/ToastHost';
 import { socket, emitAsync, getOrCreateToken } from './socket';
+import { showToast } from './toast';
+import { t } from './i18n';
 
 const SESSION_KEY = 'lockdown.session';
 
@@ -19,6 +23,7 @@ export default function App() {
   const [lang, setLang] = useState(() => localStorage.getItem('lockdown.lang') || 'en');
   const [session, setSession] = useState(loadSession);
   const [gameState, setGameState] = useState(null);
+  const [hasConnectedOnce, setHasConnectedOnce] = useState(socket.connected);
 
   useEffect(() => {
     localStorage.setItem('lockdown.lang', lang);
@@ -27,10 +32,28 @@ export default function App() {
   useEffect(() => {
     socket.connect();
     socket.on('state:update', setGameState);
+
+    function handleConnect() {
+      setHasConnectedOnce((was) => {
+        if (was) showToast(t(lang, 'app.reconnected'), 'success');
+        return true;
+      });
+    }
+    function handleDisconnect() {
+      setHasConnectedOnce((was) => {
+        if (was) showToast(t(lang, 'app.disconnected'), 'error', 5000);
+        return was;
+      });
+    }
+    socket.on('connect', handleConnect);
+    socket.on('disconnect', handleDisconnect);
+
     return () => {
       socket.off('state:update', setGameState);
+      socket.off('connect', handleConnect);
+      socket.off('disconnect', handleDisconnect);
     };
-  }, []);
+  }, [lang]);
 
   useEffect(() => {
     if (!session) return undefined;
@@ -69,7 +92,10 @@ export default function App() {
   return (
     <div className="app">
       <LanguageToggle lang={lang} setLang={setLang} />
-      {!session ? (
+      <ToastHost />
+      {!hasConnectedOnce ? (
+        <ConnectingScreen lang={lang} />
+      ) : !session ? (
         <Home lang={lang} onJoined={handleJoined} />
       ) : (
         <GameBoard lang={lang} session={session} gameState={gameState} onLeave={handleLeave} />

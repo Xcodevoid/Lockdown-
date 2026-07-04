@@ -3,6 +3,11 @@ export const translations = {
     app: {
       title: 'Lockdown',
       subtitle: 'Prisoners vs. Guards',
+      connecting: 'Connecting…',
+      connectingSlow: "The free server may be waking up from sleep — this can take up to a minute on the first connection.",
+      roomCodeCopied: 'Room code copied to clipboard',
+      reconnected: 'Reconnected',
+      disconnected: 'Connection lost — reconnecting…',
     },
     home: {
       createRoom: 'Create a Room',
@@ -163,6 +168,11 @@ export const translations = {
     app: {
       title: '越狱风云',
       subtitle: '囚犯 VS 守卫',
+      connecting: '连接中…',
+      connectingSlow: '免费服务器可能正在从休眠中唤醒——首次连接最长可能需要一分钟。',
+      roomCodeCopied: '房间代码已复制到剪贴板',
+      reconnected: '已重新连接',
+      disconnected: '连接已断开——正在重新连接…',
     },
     home: {
       createRoom: '创建房间',

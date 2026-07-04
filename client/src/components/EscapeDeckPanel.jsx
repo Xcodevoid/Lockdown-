@@ -1,8 +1,10 @@
 import { t } from '../i18n';
 import { CARD_ICON } from '../constants';
+import { useFlashOnChange } from '../useFlashOnChange';
 
 export default function EscapeDeckPanel({ lang, gameState }) {
   const { escapeDeckCount, collectedKeys, escapeDiscard, pending } = gameState;
+  const deckFlash = useFlashOnChange(escapeDeckCount);
   return (
     <div className="escape-panel">
       <h3>🔑 {t(lang, 'game.escapeDeck')}</h3>
@@ -11,7 +13,7 @@ export default function EscapeDeckPanel({ lang, gameState }) {
           <span key={i} className={`key-slot ${i < collectedKeys ? 'filled' : ''}`}>🔑</span>
         ))}
       </div>
-      <p className="deck-count">{escapeDeckCount} {t(lang, 'game.cardsLeft')}</p>
+      <p className={`deck-count ${deckFlash ? 'value-flash' : ''}`}>{escapeDeckCount} {t(lang, 'game.cardsLeft')}</p>
 
       <div className="pending-effects">
         {pending.barricadeActive && <span className="effect-badge">🚧 {t(lang, 'game.barricadeActive')}</span>}

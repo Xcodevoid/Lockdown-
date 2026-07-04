@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { t } from '../i18n';
 import { CLASS_ICON, CARD_ICON } from '../constants';
+import WaitingDots from './WaitingDots';
 
 function ClassChooser({ lang, title, desc, options, onChoose }) {
   return (
@@ -60,7 +61,7 @@ function WaitingOnOpponent({ title, desc }) {
     <div className="modal-overlay">
       <div className="modal">
         <h2>{title}</h2>
-        <p>{desc}</p>
+        <p><WaitingDots label={desc} /></p>
       </div>
     </div>
   );

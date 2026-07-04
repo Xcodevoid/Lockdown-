@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { t } from '../i18n';
 import { PRISONER_CLASSES, GUARD_CLASSES } from '../constants';
 import { emitAsync } from '../socket';
+import { showToast } from '../toast';
 import ClassStatePanel from './ClassStatePanel';
 import EscapeDeckPanel from './EscapeDeckPanel';
 import UnitPicker from './UnitPicker';
@@ -11,10 +12,10 @@ import BattleLog from './BattleLog';
 import RulesModal from './RulesModal';
 import RevealOverlay from './RevealOverlay';
 import GameOverOverlay from './GameOverOverlay';
+import WaitingDots from './WaitingDots';
 
 export default function GameBoard({ lang, session, gameState, onLeave }) {
   const [showRules, setShowRules] = useState(false);
-  const [copyLabel, setCopyLabel] = useState(null);
   const [revealIndex, setRevealIndex] = useState(0);
 
   const logLength = gameState?.log?.length ?? 0;
@@ -34,7 +35,11 @@ export default function GameBoard({ lang, session, gameState, onLeave }) {
   }, [logLength, gameState?.status, gameState?.pendingEventInput?.chooser, session.side]);
 
   if (!gameState) {
-    return <div className="loading-screen">…</div>;
+    return (
+      <div className="loading-screen">
+        <span className="inline-spinner" />
+      </div>
+    );
   }
 
   const { side } = session;
@@ -42,32 +47,25 @@ export default function GameBoard({ lang, session, gameState, onLeave }) {
 
   function copyCode() {
     navigator.clipboard?.writeText(session.roomId).then(() => {
-      setCopyLabel('✓');
-      setTimeout(() => setCopyLabel(null), 1500);
+      showToast(t(lang, 'app.roomCodeCopied'), 'success', 1800);
     });
   }
 
-  async function chooseUnit(unitClass, disguiseAs) {
-    await emitAsync('game:chooseUnit', { unitClass, disguiseAs });
+  async function actOrToastError(event, payload) {
+    const res = await emitAsync(event, payload);
+    if (!res.ok) showToast(res.reason || t(lang, 'home.error_generic'), 'error');
+    return res;
   }
-  async function swap(unitClass) {
-    await emitAsync('game:swap', { unitClass });
-  }
-  async function poisonChoice(chosenClass) {
-    await emitAsync('game:poisonChoice', { chosenClass });
-  }
-  async function secretTunnelOrder(order) {
-    await emitAsync('game:secretTunnelOrder', { order });
-  }
-  async function riotChoice(guardClass) {
-    await emitAsync('game:riotChoice', { guardClass });
-  }
-  async function reinforcementsChoice(prisonerClass) {
-    await emitAsync('game:reinforcementsChoice', { prisonerClass });
-  }
+
+  const chooseUnit = (unitClass, disguiseAs) => actOrToastError('game:chooseUnit', { unitClass, disguiseAs });
+  const swap = (unitClass) => actOrToastError('game:swap', { unitClass });
+  const poisonChoice = (chosenClass) => actOrToastError('game:poisonChoice', { chosenClass });
+  const secretTunnelOrder = (order) => actOrToastError('game:secretTunnelOrder', { order });
+  const riotChoice = (guardClass) => actOrToastError('game:riotChoice', { guardClass });
+  const reinforcementsChoice = (prisonerClass) => actOrToastError('game:reinforcementsChoice', { prisonerClass });
   async function rematch() {
     setRevealIndex(0);
-    await emitAsync('game:rematch', {});
+    await actOrToastError('game:rematch', {});
   }
 
   const opponentSide = isPrisoner ? 'guards' : 'prisoners';
@@ -78,9 +76,9 @@ export default function GameBoard({ lang, session, gameState, onLeave }) {
   return (
     <div className="game-board">
       <header className="game-header">
-        <div className="room-code-badge" onClick={copyCode} title="Copy room code">
-          {session.roomId} {copyLabel || '📋'}
-        </div>
+        <button className="room-code-badge" onClick={copyCode} title="Copy room code">
+          {session.roomId} <span className="copy-icon">📋</span>
+        </button>
         <div className="header-spacer" />
         <div className={`my-side-badge ${isPrisoner ? 'prisoners' : 'guards'}`}>
           {isPrisoner ? '🧍' : '💂'} {t(lang, isPrisoner ? 'game.prisonersLabel' : 'game.guardsLabel')}
@@ -91,14 +89,17 @@ export default function GameBoard({ lang, session, gameState, onLeave }) {
 
       {gameState.status === 'waiting_for_players' ? (
         <div className="lobby-screen">
-          <p>{t(lang, 'lobby.waiting')}</p>
+          <span className="lobby-radar" aria-hidden="true" />
+          <p><WaitingDots label={t(lang, 'lobby.waiting')} /></p>
           <p>{t(lang, 'lobby.shareCode')}</p>
           <div className="room-code-big">{session.roomId}</div>
         </div>
       ) : (
         <>
           {!opponentConnected && gameState.status !== 'finished' && (
-            <div className="banner warning">{t(lang, 'game.opponentDisconnected')}</div>
+            <div className="banner warning">
+              <span className="inline-spinner small" /> {t(lang, 'game.opponentDisconnected')}
+            </div>
           )}
 
           <div className="round-indicator">{t(lang, 'game.round')} {gameState.round}</div>
@@ -124,13 +125,13 @@ export default function GameBoard({ lang, session, gameState, onLeave }) {
               </>
             )}
             {gameState.status === 'choosing' && gameState.myChoiceSubmitted && (
-              <p className="muted pulse-text">{t(lang, 'game.waitingForOpponent')}</p>
+              <p className="muted"><WaitingDots label={t(lang, 'game.waitingForOpponent')} /></p>
             )}
             {gameState.status === 'swap_window' && !gameState.mySwapSubmitted && (
               <SwapModal lang={lang} myChoice={gameState.myChoice} eligible={gameState.eligibleClasses} onSwap={swap} />
             )}
             {gameState.status === 'swap_window' && gameState.mySwapSubmitted && (
-              <p className="muted pulse-text">{t(lang, 'game.waitingForOpponentSwap')}</p>
+              <p className="muted"><WaitingDots label={t(lang, 'game.waitingForOpponentSwap')} /></p>
             )}
             {gameState.status === 'awaiting_event_input' && (
               <EventModal
