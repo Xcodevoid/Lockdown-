@@ -2,16 +2,17 @@ import { t } from '../i18n';
 import { CLASS_ICON, STARTING_COUNT } from '../constants';
 import { useFlashOnChange } from '../useFlashOnChange';
 
-function ClassChip({ lang, cls, c, isPrisonerSide, currentRound, highlight }) {
+function ClassChip({ lang, cls, c, isPrisonerSide, currentRound, highlightClasses }) {
   const eliminated = isPrisonerSide && c.remaining <= 0;
   const riotRoundsLeft = !isPrisonerSide && c.forcedFatiguedUntilRound >= currentRound
     ? c.forcedFatiguedUntilRound - currentRound + 1
     : 0;
   const countFlash = useFlashOnChange(c.remaining);
+  const isHighlighted = highlightClasses?.includes(cls);
 
   return (
     <div
-      className={`class-chip ${c.fatigued || riotRoundsLeft > 0 ? 'fatigued' : ''} ${eliminated ? 'eliminated' : ''} ${highlight === cls ? 'highlight' : ''}`}
+      className={`class-chip ${c.fatigued || riotRoundsLeft > 0 ? 'fatigued' : ''} ${eliminated ? 'eliminated' : ''} ${isHighlighted ? 'highlight' : ''}`}
     >
       <span className="class-icon">{CLASS_ICON[cls]}</span>
       <span className="class-name">{t(lang, `classes.${cls}`)}</span>
@@ -28,7 +29,7 @@ function ClassChip({ lang, cls, c, isPrisonerSide, currentRound, highlight }) {
   );
 }
 
-export default function ClassStatePanel({ lang, title, classes, classOrder, isPrisonerSide, highlight, currentRound }) {
+export default function ClassStatePanel({ lang, title, classes, classOrder, isPrisonerSide, highlightClasses, currentRound }) {
   return (
     <div className={`class-panel ${isPrisonerSide ? 'prisoners' : 'guards'}`}>
       <h3>{title}</h3>
@@ -41,7 +42,7 @@ export default function ClassStatePanel({ lang, title, classes, classOrder, isPr
             c={classes[cls]}
             isPrisonerSide={isPrisonerSide}
             currentRound={currentRound}
-            highlight={highlight}
+            highlightClasses={highlightClasses}
           />
         ))}
       </div>

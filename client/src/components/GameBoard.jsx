@@ -104,11 +104,32 @@ export default function GameBoard({ lang, session, gameState, onLeave }) {
 
           <div className="round-indicator">{t(lang, 'game.round')} {gameState.round}</div>
 
-          <div className="panels-row">
-            <ClassStatePanel lang={lang} title={`🧍 ${t(lang, 'game.prisonersLabel')}`} classes={gameState.prisonerClasses} classOrder={PRISONER_CLASSES} isPrisonerSide />
-            <EscapeDeckPanel lang={lang} gameState={gameState} />
-            <ClassStatePanel lang={lang} title={`💂 ${t(lang, 'game.guardsLabel')}`} classes={gameState.guardClasses} classOrder={GUARD_CLASSES} currentRound={gameState.round} />
-          </div>
+          {(() => {
+            const myTurnToPick = (gameState.status === 'choosing' && !gameState.myChoiceSubmitted)
+              || (gameState.status === 'swap_window' && !gameState.mySwapSubmitted);
+            const myEligible = myTurnToPick ? gameState.eligibleClasses : null;
+            return (
+              <div className="panels-row">
+                <ClassStatePanel
+                  lang={lang}
+                  title={`🧍 ${t(lang, 'game.prisonersLabel')}`}
+                  classes={gameState.prisonerClasses}
+                  classOrder={PRISONER_CLASSES}
+                  isPrisonerSide
+                  highlightClasses={isPrisoner ? myEligible : null}
+                />
+                <EscapeDeckPanel lang={lang} gameState={gameState} />
+                <ClassStatePanel
+                  lang={lang}
+                  title={`💂 ${t(lang, 'game.guardsLabel')}`}
+                  classes={gameState.guardClasses}
+                  classOrder={GUARD_CLASSES}
+                  currentRound={gameState.round}
+                  highlightClasses={!isPrisoner ? myEligible : null}
+                />
+              </div>
+            );
+          })()}
 
           <div className="action-area">
             {gameState.status === 'choosing' && !gameState.myChoiceSubmitted && (

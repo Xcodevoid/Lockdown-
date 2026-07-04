@@ -8,6 +8,11 @@ export default function EscapeDeckPanel({ lang, gameState }) {
   return (
     <div className="escape-panel">
       <h3>🔑 {t(lang, 'game.escapeDeck')}</h3>
+      <div className="deck-stack" aria-hidden="true">
+        <span className="deck-card deck-card-3" />
+        <span className="deck-card deck-card-2" />
+        <span className="deck-card deck-card-1">🔒</span>
+      </div>
       <div className="key-progress">
         {[0, 1, 2].map((i) => (
           <span key={i} className={`key-slot ${i < collectedKeys ? 'filled' : ''}`}>🔑</span>
