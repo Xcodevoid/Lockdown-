@@ -1,5 +1,5 @@
 import { t } from '../i18n';
-import { CLASS_ICON } from '../constants';
+import { CLASS_ICON, STARTING_COUNT } from '../constants';
 
 export default function ClassStatePanel({ lang, title, classes, classOrder, isPrisonerSide, highlight, currentRound }) {
   return (
@@ -19,7 +19,7 @@ export default function ClassStatePanel({ lang, title, classes, classOrder, isPr
             >
               <span className="class-icon">{CLASS_ICON[cls]}</span>
               <span className="class-name">{t(lang, `classes.${cls}`)}</span>
-              {isPrisonerSide && <span className="class-count">{c.remaining}/4</span>}
+              {isPrisonerSide && <span className="class-count">{c.remaining}/{STARTING_COUNT}</span>}
               {riotRoundsLeft > 0 ? (
                 <span className="class-tag riot-tag">✊ {riotRoundsLeft}</span>
               ) : (

@@ -37,8 +37,8 @@ cd client && npm install && npm run dev   # http://localhost:5173
 3. Each round, both players secretly pick a unit; once both have picked, the choices are revealed
    and the battle resolves automatically according to the combat table (see in-app **Rules**
    button, available on both the home screen and the game screen).
-4. The game ends the instant either win condition is met: Prisoners collect all 3 Key Fragments,
-   or Guards fully eliminate one Prisoner class (4 discards of the same class).
+4. The game ends the instant either win condition is met: Prisoners collect 3 Key Fragments,
+   or Guards fully eliminate one Prisoner class (5 discards of the same class).
 5. Either player can hit **Play again** afterward to reset the same room for a rematch.
 
 Refreshing the page or reconnecting after a dropped connection resumes your same seat (it's keyed
@@ -58,10 +58,6 @@ designer:
 - **Fatigue deadlock guard rail**: if a player has no eligible unit because everything is either
   Fatigued or blocked by an event (e.g. Barricade), Fatigue is waived for that round only, so the
   game can never get stuck with no legal move.
-- **Power Failure** ("ignore all event effects during the next battle") cancels every pending
-  "next battle" effect outright — Barricade, Disguise tokens, Shift Rotation, and any queued
-  Lockdown/Smuggled Tools — rather than merely pausing them, so the following battle plays out
-  plain and nothing carries over past it.
 - **Who resolves each event**: Poison (which hurts the Prisoners) is chosen by the **Guards**
   player; Secret Tunnel (which helps the Prisoners) is resolved privately by the **Prisoners**
   player, who alone sees the 3 peeked cards.
@@ -85,9 +81,38 @@ battle, and it let the Guards player *choose* which already-weakened Prisoner cl
   copy (capped at 4) — directly undoes some Guard progress, mirroring how Poison directly adds to
   it.
 
-The Escape Deck is now 20 cards. The combat table itself was left untouched (Prisoners still win
-4 of 9 raw matchups to the Guards' 5) since that's a designer-set rule, not a gap — the fix targets
-the actual identified asymmetry in the event economy rather than the base matchups.
+That first pass (20-card deck) turned out not to be nearly enough. A Monte Carlo simulation —
+thousands of games played out with random-but-legal moves on both sides, used here purely to
+detect *structural* bias in the ruleset, independent of skill — showed Guards still winning
+**95.2%** of games. Root cause: Prisoners' win condition needs enough wins to cycle deep through
+the deck to uncover all 3 Key Fragments (~15 wins' worth, on average, out of only ~44% of rounds
+won), while Guards only need 4 *concentrated* losses on one class out of 12 total Prisoner cards —
+a much shorter race that finishes first almost every time.
+
+One idea floated for a fix — removing Fatigue for Prisoners only, so they could always replay
+their best matchup — was tested the same way before adopting it: **it didn't help (95.2% →
+96.3% Guards)**. Under random play, fatigue mostly just forces rotation through classes you'd
+cycle through anyway; it isn't where the imbalance actually lives, and it interacts oddly enough
+with the rest of the mechanics that it made things marginally worse rather than better.
+
+What did work, each verified by the same simulation before being adopted:
+
+- **Key Fragments raised from 3 to 9 in the deck** (still only 3 needed to win) — makes them
+  meaningfully more likely to turn up within the number of wins a game actually lasts.
+  95.2% → 68.5% Guards on its own.
+- **Prisoner starting copies raised from 4 to 5 per class** (so eliminating a class now takes 5
+  discards, not 4) — note this only changes Prisoners; Guards' own copy count was never
+  mechanically used (they're never discarded), so it stays "4" as flavor text only.
+  95.2% → 91.2% Guards alone, but combined with the Key Fragment change above: **95.2% → 54.2%
+  Guards / 45.8% Prisoners** — a healthy, close-to-even split.
+- **Power Failure replaced with Blackout** (🌑, same 1 copy): instead of "cancel all pending
+  effects" — which was very often a dead draw with nothing to cancel — it now reliably un-Fatigues
+  the Prisoner class you just played, so it always does something useful for Prisoners.
+
+The Escape Deck is now 26 cards (9 Key Fragments + 17 event cards). The combat table itself was
+still left untouched (Prisoners still win 4 of 9 raw matchups to the Guards' 5) — that's a
+designer-set rule, not a gap, and the data showed the deck/elimination pacing was the real lever,
+not the matchups.
 
 ## Notes on the build
 

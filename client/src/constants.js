@@ -1,5 +1,6 @@
 export const PRISONER_CLASSES = ['prisoner', 'veteran', 'leader'];
 export const GUARD_CLASSES = ['guard', 'sergeant', 'warden'];
+export const STARTING_COUNT = 5;
 
 export const CLASS_ICON = {
   prisoner: '🧍',
@@ -17,7 +18,7 @@ export const CARD_ICON = {
   secret_tunnel: '🗺️',
   smuggled_tools: '🪜',
   barricade: '🚧',
-  power_failure: '⚡',
+  blackout: '🌑',
   disguise: '🎭',
   shift_rotation: '🔄',
   riot: '✊',

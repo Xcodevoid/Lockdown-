@@ -35,7 +35,6 @@ export function createGame(id) {
       revealModifiers: [], // FIFO queue of 'lockdown' | 'smuggled_tools'
       barricadeActive: false, // blocks leader/warden during the round currently being chosen
       barricadeQueued: false, // set when the card is revealed; promoted to active next housekeeping pass
-      powerFailure: false,
       disguiseTokens: 0,
       shiftRotation: false,
     },
@@ -180,7 +179,11 @@ function continueReveals(state, logEntry, count) {
     const finished = revealTopEscapeCard(state, logEntry);
     if (finished) return true; // prisoners just won the game via key fragments
     remaining -= 1;
-    if (state.status === 'awaiting_event_input') {
+    // Check pendingEventInput itself, not state.status: after a resume, status is still the
+    // stale 'awaiting_event_input' string from the *previous* pause (only finishRoundHousekeeping
+    // ever resets it), so checking status here would wrongly treat a plain, no-input card revealed
+    // right after a resume as a fresh pause.
+    if (state.pendingEventInput) {
       state._pendingReveal = { remaining, logEntry };
       return true; // paused; caller must not run housekeeping yet
     }
@@ -217,8 +220,11 @@ function revealTopEscapeCard(state, logEntry) {
       state.pending.barricadeQueued = true;
       state.escapeDiscard.push(card);
       break;
-    case 'power_failure':
-      state.pending.powerFailure = true;
+    case 'blackout':
+      // The Prisoner class just played doesn't go Fatigued next round after all.
+      // (Replaces the old Power Failure, which was so often a dead draw with nothing
+      // pending to cancel that it wasn't reliably benefiting anyone.)
+      state.prisonerClasses[logEntry.prisonerClass].willBeFatigued = false;
       state.escapeDiscard.push(card);
       break;
     case 'disguise':
@@ -340,21 +346,10 @@ function resumeAfterEventInput(state) {
 }
 
 function finishRoundHousekeeping(state) {
-  if (state.pending.powerFailure) {
-    // Power Failure cancels every pending "next battle" effect outright (including
-    // anything queued this very round), so the upcoming battle plays out plain.
-    state.pending.barricadeActive = false;
-    state.pending.barricadeQueued = false;
-    state.pending.disguiseTokens = 0;
-    state.pending.shiftRotation = false;
-    state.pending.revealModifiers = [];
-    state.pending.powerFailure = false;
-  } else {
-    // Barricade lasts exactly one upcoming battle: promote the queued flag (set when the
-    // card was revealed) to active now, and let whatever was active this past round expire.
-    state.pending.barricadeActive = state.pending.barricadeQueued;
-    state.pending.barricadeQueued = false;
-  }
+  // Barricade lasts exactly one upcoming battle: promote the queued flag (set when the
+  // card was revealed) to active now, and let whatever was active this past round expire.
+  state.pending.barricadeActive = state.pending.barricadeQueued;
+  state.pending.barricadeQueued = false;
 
   for (const cls of PRISONER_CLASSES) {
     const c = state.prisonerClasses[cls];

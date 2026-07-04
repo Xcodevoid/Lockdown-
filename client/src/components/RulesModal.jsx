@@ -8,7 +8,7 @@ const CARD_ORDER = [
   'secret_tunnel',
   'smuggled_tools',
   'barricade',
-  'power_failure',
+  'blackout',
   'disguise',
   'shift_rotation',
   'riot',
@@ -34,6 +34,7 @@ export default function RulesModal({ lang, onClose }) {
           <h3>{t(lang, 'rules.setup')}</h3>
           <p>{t(lang, 'rules.setupPrisoners')}</p>
           <p>{t(lang, 'rules.setupGuards')}</p>
+          <p className="rules-note">{t(lang, 'rules.setupNote')}</p>
           <p>{t(lang, 'rules.setupDeck')}</p>
         </section>
 
