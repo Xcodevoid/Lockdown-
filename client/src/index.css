@@ -252,6 +252,9 @@ h1, h2, h3 {
   gap: 10px;
   flex-wrap: wrap;
   padding: 10px 0 22px;
+  /* Reserve room so this row's own right-aligned buttons don't run into the
+     absolutely-positioned language toggle sitting in the corner above it. */
+  padding-right: 190px;
 }
 .header-spacer { flex: 1; }
 .room-code-badge {
@@ -684,7 +687,7 @@ h1, h2, h3 {
 
 @media (max-width: 600px) {
   .app-title { font-size: 38px; }
-  .game-header { justify-content: center; }
+  .game-header { justify-content: center; padding-right: 0; margin-top: 44px; }
   .reveal-card-inner { width: 104px; height: 124px; }
   .reveal-icon { font-size: 34px; }
   .gameover-title { font-size: 30px; }
