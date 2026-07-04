@@ -1,4 +1,5 @@
-import { CLASS_ICON, classSide } from '../constants';
+import { classSide } from '../constants';
+import { ClassIcon } from '../icons';
 import { useTilt } from '../useTilt';
 
 // A single reusable "physical" card used everywhere a unit is shown or picked:
@@ -36,7 +37,7 @@ export default function TradingCard({
       <span className="tc-shine" aria-hidden="true" />
       <span className="tc-frame">
         <span className="tc-art">
-          <span className="tc-art-icon">{CLASS_ICON[classKey]}</span>
+          <span className="tc-art-icon"><ClassIcon name={classKey} /></span>
         </span>
         <span className="tc-nameplate">{label}</span>
       </span>

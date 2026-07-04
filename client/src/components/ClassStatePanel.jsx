@@ -1,5 +1,6 @@
 import { t } from '../i18n';
-import { CLASS_ICON, STARTING_COUNT } from '../constants';
+import { STARTING_COUNT } from '../constants';
+import { ClassIcon, CardIcon } from '../icons';
 import { useFlashOnChange } from '../useFlashOnChange';
 
 function ClassChip({ lang, cls, c, isPrisonerSide, currentRound, highlightClasses }) {
@@ -14,13 +15,13 @@ function ClassChip({ lang, cls, c, isPrisonerSide, currentRound, highlightClasse
     <div
       className={`class-chip ${c.fatigued || riotRoundsLeft > 0 ? 'fatigued' : ''} ${eliminated ? 'eliminated' : ''} ${isHighlighted ? 'highlight' : ''}`}
     >
-      <span className="class-icon">{CLASS_ICON[cls]}</span>
+      <span className="class-icon"><ClassIcon name={cls} /></span>
       <span className="class-name">{t(lang, `classes.${cls}`)}</span>
       {isPrisonerSide && (
         <span className={`class-count ${countFlash ? 'value-flash' : ''}`}>{c.remaining}/{STARTING_COUNT}</span>
       )}
       {riotRoundsLeft > 0 ? (
-        <span className="class-tag riot-tag">✊ {riotRoundsLeft}</span>
+        <span className="class-tag riot-tag"><CardIcon name="riot" /> {riotRoundsLeft}</span>
       ) : (
         c.fatigued && <span className="class-tag">{t(lang, 'game.fatigued')}</span>
       )}

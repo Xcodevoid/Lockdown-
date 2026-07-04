@@ -1,5 +1,5 @@
 import { t } from '../i18n';
-import { CLASS_ICON, CARD_ICON } from '../constants';
+import { ClassIcon, CardIcon } from '../icons';
 
 export default function BattleLog({ lang, log }) {
   return (
@@ -11,10 +11,10 @@ export default function BattleLog({ lang, log }) {
           <li key={log.length - i} className={`log-entry ${entry.winner}`}>
             <span className="log-round">#{entry.round}</span>
             <span className="log-matchup">
-              <span className="class-icon">{CLASS_ICON[entry.prisonerClass]}</span> {t(lang, `classes.${entry.prisonerClass}`)}
+              <span className="class-icon"><ClassIcon name={entry.prisonerClass} /></span> {t(lang, `classes.${entry.prisonerClass}`)}
               {entry.disguiseAs && <em> ({t(lang, 'game.disguiseLabel')} {t(lang, `classes.${entry.disguiseAs}`)})</em>}
               {' '}vs{' '}
-              <span className="class-icon">{CLASS_ICON[entry.guardClass]}</span> {t(lang, `classes.${entry.guardClass}`)}
+              <span className="class-icon"><ClassIcon name={entry.guardClass} /></span> {t(lang, `classes.${entry.guardClass}`)}
             </span>
             <span className="log-winner">
               {entry.winner === 'prisoners' ? '🟢' : '🔴'} {entry.winner === 'prisoners' ? t(lang, 'game.resultPrisonersWin') : t(lang, 'game.resultGuardsWin')}
@@ -23,7 +23,7 @@ export default function BattleLog({ lang, log }) {
               <span className="log-events">
                 {t(lang, 'game.eventRevealed')}:{' '}
                 {entry.escapeCardsRevealed.map((type, idx) => (
-                  <span key={idx} title={t(lang, `cards.${type}.name`)}>{CARD_ICON[type]} </span>
+                  <span key={idx} title={t(lang, `cards.${type}.name`)}><CardIcon name={type} /> </span>
                 ))}
               </span>
             )}

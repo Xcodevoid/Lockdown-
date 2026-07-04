@@ -1,5 +1,5 @@
 import { t } from '../i18n';
-import { CARD_ICON } from '../constants';
+import { CardIcon } from '../icons';
 
 const CARD_ORDER = [
   'key_fragment',
@@ -78,7 +78,7 @@ export default function RulesModal({ lang, onClose }) {
           <ul className="card-list">
             {CARD_ORDER.map((type) => (
               <li key={type}>
-                <span className="card-icon">{CARD_ICON[type]}</span>
+                <span className="card-icon"><CardIcon name={type} /></span>
                 <strong>{t(lang, `cards.${type}.name`)}</strong> — {t(lang, `cards.${type}.desc`)}
               </li>
             ))}

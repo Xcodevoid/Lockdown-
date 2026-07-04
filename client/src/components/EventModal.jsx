@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { t } from '../i18n';
-import { CARD_ICON } from '../constants';
+import { CardIcon } from '../icons';
 import WaitingDots from './WaitingDots';
 import TradingCard from './TradingCard';
 
@@ -39,7 +39,7 @@ function SecretTunnelOrderer({ lang, cards, onConfirm }) {
         <ol className="tunnel-order-list">
           {order.map((type, i) => (
             <li key={i} className="tunnel-card">
-              <span className="card-icon">{CARD_ICON[type]}</span>
+              <span className="card-icon"><CardIcon name={type} /></span>
               <span>{t(lang, `cards.${type}.name`)}</span>
               <span className="tunnel-move-buttons">
                 <button onClick={() => move(i, -1)} disabled={i === 0} aria-label={t(lang, 'game.moveUp')}>▲</button>

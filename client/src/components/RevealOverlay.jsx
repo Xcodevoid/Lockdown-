@@ -1,5 +1,5 @@
 import { t } from '../i18n';
-import { CARD_ICON } from '../constants';
+import { CardIcon } from '../icons';
 import TradingCard from './TradingCard';
 
 export default function RevealOverlay({ lang, entry, onContinue }) {
@@ -52,7 +52,7 @@ export default function RevealOverlay({ lang, entry, onContinue }) {
           <div className="reveal-cards-row">
             {entry.escapeCardsRevealed.map((type, i) => (
               <div key={i} className="reveal-escape-card" style={{ animationDelay: `${0.5 + i * 0.25}s` }}>
-                <span className="reveal-escape-icon">{CARD_ICON[type]}</span>
+                <span className="reveal-escape-icon"><CardIcon name={type} /></span>
                 <span className="reveal-escape-name">{t(lang, `cards.${type}.name`)}</span>
               </div>
             ))}
