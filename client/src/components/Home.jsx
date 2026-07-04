@@ -87,7 +87,7 @@ export default function Home({ lang, onJoined }) {
         </form>
       </div>
 
-      <button className="link-button" onClick={() => setShowRules(true)}>📖 {t(lang, 'home.howToPlay')}</button>
+      <button className="link-button how-to-play-button" onClick={() => setShowRules(true)}>📖 {t(lang, 'home.howToPlay')}</button>
       {showRules && <RulesModal lang={lang} onClose={() => setShowRules(false)} />}
     </div>
   );

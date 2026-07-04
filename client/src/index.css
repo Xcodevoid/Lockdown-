@@ -177,7 +177,9 @@ h1, h2, h3 {
   justify-content: center;
   gap: 24px;
   flex-wrap: wrap;
+  margin-bottom: 36px;
 }
+.how-to-play-button { margin-top: 4px; }
 .divider {
   align-self: center;
   color: var(--text-muted);
