@@ -8,12 +8,14 @@ function ClassChip({ lang, cls, c, isPrisonerSide, currentRound, highlightClasse
   const riotRoundsLeft = !isPrisonerSide && c.forcedFatiguedUntilRound >= currentRound
     ? c.forcedFatiguedUntilRound - currentRound + 1
     : 0;
+  const fatigueKnown = c.fatigued !== null;
+  const isFatigued = c.fatigued === true || riotRoundsLeft > 0;
   const countFlash = useFlashOnChange(c.remaining);
   const isHighlighted = highlightClasses?.includes(cls);
 
   return (
     <div
-      className={`class-chip ${c.fatigued || riotRoundsLeft > 0 ? 'fatigued' : ''} ${eliminated ? 'eliminated' : ''} ${isHighlighted ? 'highlight' : ''}`}
+      className={`class-chip ${isFatigued ? 'fatigued' : ''} ${!fatigueKnown ? 'fatigue-unknown' : ''} ${eliminated ? 'eliminated' : ''} ${isHighlighted ? 'highlight' : ''}`}
     >
       <span className="class-icon"><ClassIcon name={cls} /></span>
       <span className="class-name">{t(lang, `classes.${cls}`)}</span>
@@ -22,6 +24,8 @@ function ClassChip({ lang, cls, c, isPrisonerSide, currentRound, highlightClasse
       )}
       {riotRoundsLeft > 0 ? (
         <span className="class-tag riot-tag"><CardIcon name="riot" /> {riotRoundsLeft}</span>
+      ) : !fatigueKnown ? (
+        <span className="class-tag unknown-tag" title={t(lang, 'game.fatigueHiddenTooltip')}>?</span>
       ) : (
         c.fatigued && <span className="class-tag">{t(lang, 'game.fatigued')}</span>
       )}
@@ -31,9 +35,12 @@ function ClassChip({ lang, cls, c, isPrisonerSide, currentRound, highlightClasse
 }
 
 export default function ClassStatePanel({ lang, title, classes, classOrder, isPrisonerSide, highlightClasses, currentRound }) {
+  const isOpponentView = classOrder.some((cls) => classes[cls].fatigued === null);
+
   return (
     <div className={`class-panel ${isPrisonerSide ? 'prisoners' : 'guards'}`}>
       <h3>{title}</h3>
+      {isOpponentView && <p className="fatigue-hidden-note">{t(lang, 'game.fatigueHiddenNote')}</p>}
       <div className="class-chip-row">
         {classOrder.map((cls) => (
           <ClassChip

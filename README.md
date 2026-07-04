@@ -114,6 +114,31 @@ still left untouched (Prisoners still win 4 of 9 raw matchups to the Guards' 5) 
 designer-set rule, not a gap, and the data showed the deck/elimination pacing was the real lever,
 not the matchups.
 
+## Hidden information (strategic depth pass)
+
+After the balance pass, the game still felt "solved" once both players learned the matchup table:
+almost everything was public (Fatigue state, remaining counts, discard piles), so an experienced
+opponent could usually deduce your exact legal options before you even picked. Two structural
+causes:
+
+1. Fatigue state was fully visible for *both* sides in real time, and with only 3 classes to
+   choose from, that regularly narrowed an opponent's choice down to something you could already
+   see coming — very little of a real mind game was left.
+2. Guards never face permanent attrition (only Fatigue, which cycles every round), so their side
+   never builds toward anything over a long game the way Prisoners' dwindling copies do.
+
+The surgical fix (chosen over bigger rewrites like multi-lane simultaneous battles, to keep the
+change low-risk): **your opponent's Fatigue status is now hidden from you.** You always see your
+own Fatigue (you need it to know your options), and progress-tracking info stays fully public on
+both sides (remaining/eliminated counts, discard piles, and any active card effect like a Riot
+lock — those are public because a played card caused them, not because you can read minds). But
+you can no longer see whether your opponent's classes are Fatigued, which restores real
+uncertainty about their next move without changing any win condition or combat rule.
+
+This only touches what `publicState()` broadcasts to each client — `server/game/gameEngine.js`'s
+actual rules engine (`getEligibleClasses`, `resolveBattle`, etc.) still operates on full,
+unredacted truth, so there's no risk of this leaking into game logic.
+
 ## Notes on the build
 
 - All real-time state (whose turn, fatigue, discard piles, the escape deck) is authoritative on

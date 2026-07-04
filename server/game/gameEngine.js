@@ -368,13 +368,36 @@ function finishRoundHousekeeping(state) {
   state.status = 'choosing';
 }
 
+// Your own side's Fatigue is always visible to you (you need it to know your options).
+// Your opponent's Fatigue is hidden - only remaining/eliminated counts and active card
+// effects (e.g. a Riot lock, which is public because it was caused by a played card) stay
+// visible for them. This is the one deliberately-hidden layer in an otherwise fully public
+// game, added so an experienced opponent can't fully deduce your next legal move before you
+// choose it.
+function ownClassView(classState) {
+  const out = {};
+  for (const cls of Object.keys(classState)) {
+    const { willBeFatigued, ...rest } = classState[cls];
+    out[cls] = rest;
+  }
+  return out;
+}
+function opponentClassView(classState) {
+  const out = {};
+  for (const cls of Object.keys(classState)) {
+    const { willBeFatigued, ...rest } = classState[cls];
+    out[cls] = { ...rest, fatigued: null }; // null = hidden, distinct from true/false
+  }
+  return out;
+}
+
 export function publicState(state, forSide) {
   return {
     id: state.id,
     status: state.status,
     round: state.round,
-    prisonerClasses: state.prisonerClasses,
-    guardClasses: state.guardClasses,
+    prisonerClasses: forSide === 'prisoners' ? ownClassView(state.prisonerClasses) : opponentClassView(state.prisonerClasses),
+    guardClasses: forSide === 'guards' ? ownClassView(state.guardClasses) : opponentClassView(state.guardClasses),
     eligibleClasses: getEligibleClasses(state, forSide).eligible,
     eligibleFallbackLevel: getEligibleClasses(state, forSide).fallbackLevel,
     escapeDeckCount: state.escapeDeck.length,
