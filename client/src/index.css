@@ -171,22 +171,54 @@ h1, h2, h3 {
   text-transform: uppercase;
 }
 
-.home-columns {
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
-  gap: 24px;
-  flex-wrap: wrap;
-  margin-bottom: 36px;
-}
 .how-to-play-button { margin-top: 4px; }
-.divider {
-  align-self: center;
+
+.home-shared-name { display: flex; justify-content: center; margin-bottom: 20px; }
+.home-shared-name label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 14px;
   color: var(--text-muted);
-  font-weight: 700;
-  font-family: var(--font-display);
-  letter-spacing: 2px;
+  width: 260px;
 }
+.home-shared-name input {
+  font: inherit;
+  padding: 11px 13px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,0.25);
+  color: var(--text);
+}
+.home-shared-name input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.home-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.home-tabs button {
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 14px;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.home-tabs button:hover { border-color: var(--text-muted); color: var(--text); }
+.home-tabs button.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  border-color: transparent;
+  color: #06140d;
+}
+
+.home-panel { display: flex; justify-content: center; margin-bottom: 20px; }
+.card.wide { width: 100%; max-width: 480px; }
 
 .card {
   background: linear-gradient(160deg, var(--panel-bg), var(--panel-bg-2));
@@ -244,6 +276,8 @@ h1, h2, h3 {
 }
 .side-option:has(input[value="prisoners"]).selected { border-color: var(--prisoner); background: var(--prisoner-bg); box-shadow: 0 0 0 3px var(--prisoner-glow) inset; }
 .side-option:has(input[value="guards"]).selected { border-color: var(--guard); background: var(--guard-bg); box-shadow: 0 0 0 3px var(--guard-glow) inset; }
+.side-option:has(input[value="public"]).selected { border-color: var(--accent); background: rgba(51,193,126,0.08); box-shadow: 0 0 0 3px var(--accent-glow) inset; }
+.side-option:has(input[value="private"]).selected { border-color: var(--guard); background: var(--guard-bg); box-shadow: 0 0 0 3px var(--guard-glow) inset; }
 .side-option input { width: auto; accent-color: var(--accent); }
 .side-option small { flex-basis: 100%; color: var(--text-muted); font-weight: 400; }
 
@@ -925,3 +959,36 @@ h1, h2, h3 {
   100% { transform: translate(4%, 3%) scale(1.08); }
 }
 .app { position: relative; z-index: 1; }
+
+/* ============ Lobby browser ============ */
+.lobby-browser-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.lobby-browser-header h2 { margin-bottom: 0; }
+.lobby-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 360px;
+  overflow-y: auto;
+}
+.lobby-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  animation: fadeUp 0.3s ease both;
+}
+.lobby-host { font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.lobby-open-side { font-size: 13px; flex: 1; min-width: 120px; }
+.lobby-join-button { padding: 8px 18px; font-size: 14px; }

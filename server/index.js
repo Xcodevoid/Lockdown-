@@ -20,6 +20,7 @@ import {
   findSeatBySocket,
   broadcastState,
   resetRoomGame,
+  listPublicRooms,
 } from './rooms.js';
 
 const PORT = process.env.PORT || 4000;
@@ -45,10 +46,10 @@ function seatContext(socket) {
 }
 
 io.on('connection', (socket) => {
-  socket.on('room:create', ({ name, side, token }, ack) => {
+  socket.on('room:create', ({ name, side, token, visibility }, ack) => {
     try {
       if (!['prisoners', 'guards'].includes(side)) throw new Error('Invalid side');
-      const roomId = createRoom(side, name?.trim() || 'Player', token);
+      const roomId = createRoom(side, name?.trim() || 'Player', token, visibility);
       attachSocket(roomId, side, socket.id);
       socket.join(roomId);
       ack?.({ ok: true, roomId, side });
@@ -56,6 +57,10 @@ io.on('connection', (socket) => {
     } catch (err) {
       ack?.({ ok: false, reason: err.message });
     }
+  });
+
+  socket.on('lobby:list', (_payload, ack) => {
+    ack?.({ ok: true, rooms: listPublicRooms() });
   });
 
   socket.on('room:join', ({ roomId, name, token, preferredSide }, ack) => {

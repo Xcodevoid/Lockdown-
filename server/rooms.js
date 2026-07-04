@@ -5,22 +5,46 @@ const makeRoomId = customAlphabet('ABCDEFGHJKLMNPQRSTUVWXYZ23456789', 5); // no 
 
 // roomId -> {
 //   game,
+//   visibility: 'public' | 'private',
+//   createdAt: number,
 //   seats: { prisoners: { token, name, socketId }, guards: { token, name, socketId } }
 // }
 const rooms = new Map();
 
-export function createRoom(side, name, token) {
+export function createRoom(side, name, token, visibility = 'public') {
   let roomId = makeRoomId();
   while (rooms.has(roomId)) roomId = makeRoomId();
 
   const room = {
     game: createGame(roomId),
+    visibility: visibility === 'private' ? 'private' : 'public',
+    createdAt: Date.now(),
     seats: { prisoners: null, guards: null },
   };
   room.seats[side] = { token, name, socketId: null };
   room.game.players[side] = { name, connected: false };
   rooms.set(roomId, room);
   return roomId;
+}
+
+// Public rooms that are still waiting for a second player, with a currently-connected host -
+// what a player browsing for a game to join would want to see.
+export function listPublicRooms() {
+  const list = [];
+  for (const [roomId, room] of rooms.entries()) {
+    if (room.visibility !== 'public') continue;
+    if (room.game.status !== 'waiting_for_players') continue;
+    const hostSide = room.seats.prisoners ? 'prisoners' : room.seats.guards ? 'guards' : null;
+    if (!hostSide || !room.seats[hostSide].socketId) continue;
+    list.push({
+      roomId,
+      hostName: room.seats[hostSide].name,
+      hostSide,
+      openSide: hostSide === 'prisoners' ? 'guards' : 'prisoners',
+      createdAt: room.createdAt,
+    });
+  }
+  return list.sort((a, b) => b.createdAt - a.createdAt);
 }
 
 export function getRoom(roomId) {
