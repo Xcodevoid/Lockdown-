@@ -1,5 +1,6 @@
 import { t } from '../i18n';
-import { CLASS_ICON, CARD_ICON } from '../constants';
+import { CARD_ICON } from '../constants';
+import TradingCard from './TradingCard';
 
 export default function RevealOverlay({ lang, entry, onContinue }) {
   const prisonersWon = entry.winner === 'prisoners';
@@ -11,23 +12,29 @@ export default function RevealOverlay({ lang, entry, onContinue }) {
         <div className="reveal-round-tag">{t(lang, 'game.round')} {entry.round}</div>
 
         <div className="reveal-vs-row">
-          <div className="reveal-card prisoner-side">
-            <div className="reveal-card-inner">
-              <span className="reveal-icon">{CLASS_ICON[entry.prisonerClass]}</span>
-              <span className="reveal-label">{t(lang, `classes.${entry.prisonerClass}`)}</span>
-              {entry.disguiseAs && (
-                <span className="reveal-disguise">🎭 → {t(lang, `classes.${entry.disguiseAs}`)}</span>
-              )}
-            </div>
+          <div className="reveal-vs-col">
+            <TradingCard
+              classKey={entry.prisonerClass}
+              label={t(lang, `classes.${entry.prisonerClass}`)}
+              interactive={false}
+              size="lg"
+              className="reveal-card-flip"
+            />
+            {entry.disguiseAs && (
+              <span className="reveal-disguise">🎭 → {t(lang, `classes.${entry.disguiseAs}`)}</span>
+            )}
           </div>
 
           <div className="reveal-vs-badge">VS</div>
 
-          <div className="reveal-card guard-side">
-            <div className="reveal-card-inner">
-              <span className="reveal-icon">{CLASS_ICON[entry.guardClass]}</span>
-              <span className="reveal-label">{t(lang, `classes.${entry.guardClass}`)}</span>
-            </div>
+          <div className="reveal-vs-col">
+            <TradingCard
+              classKey={entry.guardClass}
+              label={t(lang, `classes.${entry.guardClass}`)}
+              interactive={false}
+              size="lg"
+              className="reveal-card-flip"
+            />
           </div>
         </div>
 
@@ -37,7 +44,7 @@ export default function RevealOverlay({ lang, entry, onContinue }) {
 
         {entry.prisonerDiscarded && (
           <div className="reveal-note">
-            {CLASS_ICON[entry.prisonerDiscarded]} {t(lang, `classes.${entry.prisonerDiscarded}`)} — {t(lang, 'game.eliminated')}
+            {t(lang, `classes.${entry.prisonerDiscarded}`)} — {t(lang, 'game.eliminated')}
           </div>
         )}
 

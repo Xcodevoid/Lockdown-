@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { t } from '../i18n';
-import { CLASS_ICON, CARD_ICON } from '../constants';
+import { CARD_ICON } from '../constants';
 import WaitingDots from './WaitingDots';
+import TradingCard from './TradingCard';
 
 function ClassChooser({ lang, title, desc, options, onChoose }) {
   return (
@@ -11,10 +12,7 @@ function ClassChooser({ lang, title, desc, options, onChoose }) {
         <p>{desc}</p>
         <div className="unit-buttons">
           {options.map((cls) => (
-            <button key={cls} className="unit-button" onClick={() => onChoose(cls)}>
-              <span className="class-icon big">{CLASS_ICON[cls]}</span>
-              <span>{t(lang, `classes.${cls}`)}</span>
-            </button>
+            <TradingCard key={cls} classKey={cls} label={t(lang, `classes.${cls}`)} onClick={() => onChoose(cls)} />
           ))}
         </div>
       </div>

@@ -141,6 +141,7 @@ export default function GameBoard({ lang, session, gameState, onLeave }) {
                   side={side}
                   eligible={gameState.eligibleClasses}
                   disguiseTokens={gameState.pending.disguiseTokens}
+                  classCounts={isPrisoner ? gameState.prisonerClasses : null}
                   onSubmit={chooseUnit}
                 />
               </>

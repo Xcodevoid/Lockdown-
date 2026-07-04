@@ -1,18 +1,22 @@
 import { useState } from 'react';
 import { t } from '../i18n';
-import { CLASS_ICON, PRISONER_CLASSES } from '../constants';
+import { PRISONER_CLASSES } from '../constants';
+import TradingCard from './TradingCard';
 
-export default function UnitPicker({ lang, side, eligible, disguiseTokens, onSubmit, submitLabel }) {
+export default function UnitPicker({ lang, side, eligible, disguiseTokens, classCounts, onSubmit }) {
   const [disguiseAs, setDisguiseAs] = useState('');
 
   return (
     <div className="unit-picker">
       <div className="unit-buttons">
         {eligible.map((cls) => (
-          <button key={cls} className="unit-button" onClick={() => onSubmit(cls, disguiseAs || null)}>
-            <span className="class-icon big">{CLASS_ICON[cls]}</span>
-            <span>{t(lang, `classes.${cls}`)}</span>
-          </button>
+          <TradingCard
+            key={cls}
+            classKey={cls}
+            label={t(lang, `classes.${cls}`)}
+            counter={classCounts?.[cls]?.remaining}
+            onClick={() => onSubmit(cls, disguiseAs || null)}
+          />
         ))}
       </div>
 

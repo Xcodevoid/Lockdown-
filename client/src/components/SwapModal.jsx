@@ -1,5 +1,5 @@
 import { t } from '../i18n';
-import { CLASS_ICON } from '../constants';
+import TradingCard from './TradingCard';
 
 export default function SwapModal({ lang, myChoice, eligible, onSwap }) {
   return (
@@ -7,15 +7,14 @@ export default function SwapModal({ lang, myChoice, eligible, onSwap }) {
       <div className="modal">
         <h2>🔄 {t(lang, 'game.swapTitle')}</h2>
         <p>{t(lang, 'game.swapDesc')}</p>
-        <p className="current-choice">
-          {t(lang, 'game.youChose')}: <span className="class-icon">{CLASS_ICON[myChoice]}</span> {t(lang, `classes.${myChoice}`)}
-        </p>
+        <p className="current-choice">{t(lang, 'game.youChose')}:</p>
+        <div className="unit-buttons">
+          <TradingCard classKey={myChoice} label={t(lang, `classes.${myChoice}`)} interactive={false} size="sm" />
+        </div>
+        <p className="current-choice">↓</p>
         <div className="unit-buttons">
           {eligible.filter((c) => c !== myChoice).map((cls) => (
-            <button key={cls} className="unit-button" onClick={() => onSwap(cls)}>
-              <span className="class-icon big">{CLASS_ICON[cls]}</span>
-              <span>{t(lang, `classes.${cls}`)}</span>
-            </button>
+            <TradingCard key={cls} classKey={cls} label={t(lang, `classes.${cls}`)} onClick={() => onSwap(cls)} />
           ))}
         </div>
         <button className="primary-button" onClick={() => onSwap(null)}>{t(lang, 'game.swapKeep')}</button>
