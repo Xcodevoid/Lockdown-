@@ -139,6 +139,36 @@ This only touches what `publicState()` broadcasts to each client — `server/gam
 actual rules engine (`getEligibleClasses`, `resolveBattle`, etc.) still operates on full,
 unredacted truth, so there's no risk of this leaking into game logic.
 
+## 3D Prison Yard (Milestone 1 of a full 3D reimagining)
+
+Feedback: the game was "only clicking" and should feel like players are actually acting as a
+character. The first milestone of turning this into a real 3D game: "choosing your unit" is now a
+walkable 3D scene (`client/src/three/`) instead of a row of buttons — a low-poly prison yard with
+one station per eligible class, a controllable avatar, and click/tap-to-move navigation. Arriving
+at a station fires the exact same `onSubmit(cls, disguiseAs)` call the old 2D `UnitPicker` used,
+so `server/` needed zero changes and the rest of the UI (reveal, panels, rules, etc.) is untouched.
+
+Built with `three` + `@react-three/fiber` + `@react-three/drei`, lazy-loaded so the Home page
+never pays for the ~240KB gzipped bundle. Characters are procedurally built from primitive shapes
+(no external 3D assets), reusing the same visual language as the 2D icon set — a person figure
+with a stripe/crown for Veteran/Leader, a capped figure with a stripe/badge for Sergeant/Warden.
+
+**A real bug worth knowing about if you touch this code**: `@react-three/drei`'s `<Text>`
+component (which does async font loading via troika-three-text) caused React to permanently hide
+the whole Canvas with an inline `display: none !important` after the first successful render —
+this is React's own mechanism for hiding content that suspends *again* after already committing,
+and here it never un-hid because the font-load promise didn't resolve back into a normal render.
+Station labels use drei's `<Html>` instead (plain DOM text projected onto the 3D position), which
+sidesteps the issue entirely. Confirmed via `outerHTML` inspection during debugging, not a guess.
+
+Multiplayer-integrity note: each player's avatar movement is 100% local to their own client and
+never synced to the opponent over the socket — the server only ever learns your choice at the
+same moment it already did before (a single `chooseUnit` emit on arrival). Syncing live positions
+would leak your pick before reveal, undermining the hidden-information work above.
+
+Not yet built (roadmap): a 3D battle-reveal/duel scene, converting `SwapModal`/`EventModal` to the
+same station pattern, environment polish, and a no-WebGL fallback.
+
 ## Notes on the build
 
 - All real-time state (whose turn, fatigue, discard piles, the escape deck) is authoritative on
