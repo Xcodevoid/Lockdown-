@@ -46,6 +46,14 @@ export default function RulesModal({ lang, onClose }) {
         </section>
 
         <section>
+          <h3>{t(lang, 'rules.stancesTitle')}</h3>
+          <p>{t(lang, 'rules.stancesIntro')}</p>
+          <ul>
+            {t(lang, 'rules.stancesList').map((s, i) => <li key={i}>{s}</li>)}
+          </ul>
+        </section>
+
+        <section>
           <h3>{t(lang, 'rules.permanent')}</h3>
           <ul>
             {t(lang, 'rules.permanentList').map((s, i) => <li key={i}>{s}</li>)}

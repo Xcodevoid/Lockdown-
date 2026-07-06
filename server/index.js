@@ -79,11 +79,11 @@ io.on('connection', (socket) => {
     broadcastState(io, roomId.trim().toUpperCase());
   });
 
-  socket.on('game:chooseUnit', ({ unitClass, disguiseAs }, ack) => {
+  socket.on('game:chooseUnit', ({ unitClass, disguiseAs, stance }, ack) => {
     const ctx = seatContext(socket);
     if (!ctx) return ack?.({ ok: false, reason: 'not_seated' });
     try {
-      submitChoice(ctx.room.game, ctx.side, unitClass, disguiseAs);
+      submitChoice(ctx.room.game, ctx.side, unitClass, disguiseAs, stance);
       ack?.({ ok: true });
       broadcastState(io, ctx.roomId);
     } catch (err) {

@@ -137,10 +137,43 @@ const CARD_ICONS = {
   ),
 };
 
+const STANCE_ICONS = {
+  standard: (
+    <Svg>
+      <path d="M12 4v15M7 19h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" />
+      <path d="M5 7h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" fill="none" />
+      <path d="M5 7l-2.2 4.6a2.6 2.6 0 0 0 5.2 0z" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M19 7l-2.2 4.6a2.6 2.6 0 0 0 5.2 0z" fill="none" stroke="currentColor" strokeWidth="1.5" />
+    </Svg>
+  ),
+  aggressive: (
+    <Svg>
+      <g stroke="currentColor" strokeWidth="2.1" strokeLinecap="round">
+        <line x1="4.5" y1="19.5" x2="17" y2="7" />
+        <line x1="12.98" y1="8.48" x2="15.52" y2="11.02" />
+        <line x1="19.5" y1="19.5" x2="7" y2="7" />
+        <line x1="8.48" y1="11.02" x2="11.02" y2="8.48" />
+      </g>
+      <circle cx="4.5" cy="19.5" r="1.3" />
+      <circle cx="19.5" cy="19.5" r="1.3" />
+    </Svg>
+  ),
+  cautious: (
+    <Svg>
+      <path d="M12 2.4l7.4 2.8v5.6c0 5.6-3.2 9.6-7.4 11-4.2-1.4-7.4-5.4-7.4-11V5.2z" />
+      <path d="M12 4.6v15.8" stroke="var(--bg-deep)" strokeWidth="1.3" fill="none" opacity="0.6" />
+    </Svg>
+  ),
+};
+
 export function ClassIcon({ name }) {
   return CLASS_ICONS[name] ?? null;
 }
 
 export function CardIcon({ name }) {
   return CARD_ICONS[name] ?? null;
+}
+
+export function StanceIcon({ name }) {
+  return STANCE_ICONS[name] ?? null;
 }

@@ -1,6 +1,15 @@
 import { t } from '../i18n';
-import { CardIcon } from '../icons';
+import { CardIcon, StanceIcon } from '../icons';
 import TradingCard from './TradingCard';
+
+function StanceTag({ lang, stance }) {
+  if (!stance || stance === 'standard') return null;
+  return (
+    <span className="reveal-stance-tag">
+      <StanceIcon name={stance} /> {t(lang, `stances.${stance}.name`)}
+    </span>
+  );
+}
 
 export default function RevealOverlay({ lang, entry, onContinue }) {
   const prisonersWon = entry.winner === 'prisoners';
@@ -20,6 +29,7 @@ export default function RevealOverlay({ lang, entry, onContinue }) {
               size="lg"
               className="reveal-card-flip"
             />
+            <StanceTag lang={lang} stance={entry.prisonerStance} />
             {entry.disguiseAs && (
               <span className="reveal-disguise">🎭 → {t(lang, `classes.${entry.disguiseAs}`)}</span>
             )}
@@ -35,6 +45,7 @@ export default function RevealOverlay({ lang, entry, onContinue }) {
               size="lg"
               className="reveal-card-flip"
             />
+            <StanceTag lang={lang} stance={entry.guardStance} />
           </div>
         </div>
 
@@ -45,6 +56,18 @@ export default function RevealOverlay({ lang, entry, onContinue }) {
         {entry.prisonerDiscarded && (
           <div className="reveal-note">
             {t(lang, `classes.${entry.prisonerDiscarded}`)} — {t(lang, 'game.eliminated')}
+          </div>
+        )}
+
+        {entry.discardPrevented && (
+          <div className="reveal-note reveal-note-good">
+            {t(lang, 'stances.cautious.name')}: {t(lang, 'game.discardPreventedNote')}
+          </div>
+        )}
+
+        {entry.aggressiveBonusDiscard && (
+          <div className="reveal-note">
+            {t(lang, 'stances.aggressive.name')}: {t(lang, `classes.${entry.aggressiveBonusDiscard}`)} — {t(lang, 'game.aggressiveBonusNote')}
           </div>
         )}
 

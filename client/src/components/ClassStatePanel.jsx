@@ -53,11 +53,14 @@ function TroopTokens({ classKey, total, remaining, isFatigued, fatigueKnown }) {
 
 function ClassChip({ lang, cls, c, isPrisonerSide, currentRound, highlightClasses }) {
   const eliminated = isPrisonerSide && c.remaining <= 0;
-  const riotRoundsLeft = !isPrisonerSide && c.forcedFatiguedUntilRound >= currentRound
+  // This "until round N" lock now has two possible causes on either side - Riot (Guards only,
+  // opponent-imposed) or the Aggressive stance (either side, self-imposed) - so the tag itself
+  // stays cause-agnostic and just reports the lock, same as it already did for Riot.
+  const lockedRoundsLeft = c.forcedFatiguedUntilRound >= currentRound
     ? c.forcedFatiguedUntilRound - currentRound + 1
     : 0;
   const fatigueKnown = c.fatigued !== null;
-  const isFatigued = c.fatigued === true || riotRoundsLeft > 0;
+  const isFatigued = c.fatigued === true || lockedRoundsLeft > 0;
   const countFlash = useFlashOnChange(c.remaining);
   const isHighlighted = highlightClasses?.includes(cls);
   const rosterTotal = isPrisonerSide ? STARTING_COUNT : GUARD_FLAVOR_COUNT;
@@ -73,8 +76,8 @@ function ClassChip({ lang, cls, c, isPrisonerSide, currentRound, highlightClasse
         {isPrisonerSide && (
           <span className={`class-count ${countFlash ? 'value-flash' : ''}`}>{c.remaining}/{STARTING_COUNT}</span>
         )}
-        {riotRoundsLeft > 0 ? (
-          <span className="class-tag riot-tag"><CardIcon name="riot" /> {riotRoundsLeft}</span>
+        {lockedRoundsLeft > 0 ? (
+          <span className="class-tag riot-tag"><CardIcon name="lockdown" /> {lockedRoundsLeft}</span>
         ) : !fatigueKnown ? (
           <span className="class-tag unknown-tag" title={t(lang, 'game.fatigueHiddenTooltip')}>?</span>
         ) : (

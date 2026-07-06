@@ -1,5 +1,10 @@
 import { t } from '../i18n';
-import { ClassIcon, CardIcon } from '../icons';
+import { ClassIcon, CardIcon, StanceIcon } from '../icons';
+
+function StanceBadge({ lang, stance }) {
+  if (!stance || stance === 'standard') return null;
+  return <span className="stance-badge" title={t(lang, `stances.${stance}.name`)}><StanceIcon name={stance} /></span>;
+}
 
 export default function BattleLog({ lang, log }) {
   return (
@@ -12,9 +17,11 @@ export default function BattleLog({ lang, log }) {
             <span className="log-round">#{entry.round}</span>
             <span className="log-matchup">
               <span className="class-icon"><ClassIcon name={entry.prisonerClass} /></span> {t(lang, `classes.${entry.prisonerClass}`)}
+              <StanceBadge lang={lang} stance={entry.prisonerStance} />
               {entry.disguiseAs && <em> ({t(lang, 'game.disguiseLabel')} {t(lang, `classes.${entry.disguiseAs}`)})</em>}
               {' '}vs{' '}
               <span className="class-icon"><ClassIcon name={entry.guardClass} /></span> {t(lang, `classes.${entry.guardClass}`)}
+              <StanceBadge lang={lang} stance={entry.guardStance} />
             </span>
             <span className="log-winner">
               {entry.winner === 'prisoners' ? '🟢' : '🔴'} {entry.winner === 'prisoners' ? t(lang, 'game.resultPrisonersWin') : t(lang, 'game.resultGuardsWin')}

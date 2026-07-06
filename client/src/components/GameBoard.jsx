@@ -57,7 +57,7 @@ export default function GameBoard({ lang, session, gameState, onLeave }) {
     return res;
   }
 
-  const chooseUnit = (unitClass, disguiseAs) => actOrToastError('game:chooseUnit', { unitClass, disguiseAs });
+  const chooseUnit = (unitClass, disguiseAs, stance) => actOrToastError('game:chooseUnit', { unitClass, disguiseAs, stance });
   const swap = (unitClass) => actOrToastError('game:swap', { unitClass });
   const poisonChoice = (chosenClass) => actOrToastError('game:poisonChoice', { chosenClass });
   const secretTunnelOrder = (order) => actOrToastError('game:secretTunnelOrder', { order });
@@ -116,6 +116,7 @@ export default function GameBoard({ lang, session, gameState, onLeave }) {
                   classes={gameState.prisonerClasses}
                   classOrder={PRISONER_CLASSES}
                   isPrisonerSide
+                  currentRound={gameState.round}
                   highlightClasses={isPrisoner ? myEligible : null}
                 />
                 <EscapeDeckPanel lang={lang} gameState={gameState} />

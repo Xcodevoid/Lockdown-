@@ -628,6 +628,54 @@ h1, h2, h3 {
 .disguise-select { display: flex; gap: 8px; align-items: center; font-weight: 600; font-size: 14px; color: var(--text-muted); }
 .disguise-select select { font: inherit; padding: 7px 11px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--panel-bg-2); color: var(--text); }
 
+/* ============ Stance picker ============ */
+.stance-picker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding-top: 6px;
+  animation: fadeUp 0.25s ease both;
+}
+.stance-picker-label { font-size: 13px; font-weight: 700; letter-spacing: 0.5px; color: var(--text-muted); text-transform: uppercase; }
+.stance-buttons { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.stance-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 84px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--panel-bg-2);
+  color: var(--text-muted);
+  font: inherit;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.stance-option:hover { transform: translateY(-2px); color: var(--text); }
+.stance-option.selected { border-color: var(--accent-strong); color: var(--text); box-shadow: 0 0 0 1px var(--accent-strong), 0 0 16px -2px var(--accent-glow); }
+.stance-option-icon { font-size: 22px; }
+.stance-option-name { font-size: 12.5px; font-weight: 700; }
+.stance-picker-desc { max-width: 380px; font-size: 12.5px; color: var(--text-muted); text-align: center; line-height: 1.4; }
+.lock-in-button { margin-top: 4px; }
+
+.stance-badge { display: inline-flex; vertical-align: -0.15em; margin-left: 3px; color: var(--accent-strong); }
+.reveal-stance-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--accent-strong);
+  background: rgba(51, 193, 126, 0.10);
+  border: 1px solid var(--accent-glow);
+  border-radius: 999px;
+  padding: 3px 9px;
+}
+.reveal-note-good { color: var(--accent-strong); }
+
 /* ============ Modals ============ */
 .modal-overlay {
   position: fixed;

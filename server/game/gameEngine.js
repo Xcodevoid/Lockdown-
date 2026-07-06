@@ -11,7 +11,7 @@ function shuffle(array) {
 
 function freshClassState() {
   const c = {};
-  for (const cls of PRISONER_CLASSES) c[cls] = { remaining: STARTING_COUNT, fatigued: false, willBeFatigued: false };
+  for (const cls of PRISONER_CLASSES) c[cls] = { remaining: STARTING_COUNT, fatigued: false, willBeFatigued: false, forcedFatiguedUntilRound: 0 };
   return c;
 }
 function freshGuardClassState() {
@@ -58,8 +58,10 @@ export function getEligibleClasses(state, side) {
   const barricadeActive = state.pending.barricadeActive;
 
   const passesSurvival = (cls) => (side === 'prisoners' ? classState[cls].remaining > 0 : true);
-  // Riot locks a Guard class out for two rounds (an "until round N" mark) rather than the usual one.
-  const isForcedFatigued = (cls) => side === 'guards' && classState[cls].forcedFatiguedUntilRound >= state.round;
+  // A class can be locked out for two rounds instead of the usual one via an "until round N"
+  // mark - either Riot (opponent-imposed, guards only) or the Aggressive stance (self-imposed,
+  // either side), so this checks both sides' classes the same way.
+  const isForcedFatigued = (cls) => classState[cls].forcedFatiguedUntilRound >= state.round;
   const isFatigued = (cls) => classState[cls].fatigued || isForcedFatigued(cls);
 
   const tier1 = classes.filter((cls) => passesSurvival(cls) && !isFatigued(cls) && !(barricadeActive && cls === barricadedClass));
@@ -72,7 +74,9 @@ export function getEligibleClasses(state, side) {
   return { eligible: tier3, fallbackLevel: 'ignored_fatigue_and_barricade' };
 }
 
-export function submitChoice(state, side, unitClass, disguiseAs) {
+const STANCES = ['standard', 'aggressive', 'cautious'];
+
+export function submitChoice(state, side, unitClass, disguiseAs, stance) {
   if (state.status !== 'choosing') throw new Error('Not currently choosing units');
   if (state.choices[side]) throw new Error('Choice already submitted this round');
 
@@ -85,7 +89,9 @@ export function submitChoice(state, side, unitClass, disguiseAs) {
     disguiseUsed = disguiseAs;
   }
 
-  state.choices[side] = { unitClass, disguiseAs: disguiseUsed };
+  const stanceUsed = STANCES.includes(stance) ? stance : 'standard';
+
+  state.choices[side] = { unitClass, disguiseAs: disguiseUsed, stance: stanceUsed };
 
   if (state.choices.prisoners && state.choices.guards) {
     if (state.pending.shiftRotation) {
@@ -107,7 +113,7 @@ export function submitSwap(state, side, newUnitClass) {
     const currentClass = state.choices[side].unitClass;
     if (newUnitClass === currentClass) throw new Error('Must switch to a different unit to use Shift Rotation');
     if (!eligible.includes(newUnitClass)) throw new Error(`${newUnitClass} is not eligible`);
-    state.choices[side] = { unitClass: newUnitClass, disguiseAs: null };
+    state.choices[side] = { unitClass: newUnitClass, disguiseAs: null, stance: state.choices[side].stance };
   }
   state.swap[side] = true;
 
@@ -128,31 +134,72 @@ function resolveRound(state) {
   const guardClass = state.choices.guards.unitClass;
   const disguiseAs = state.choices.prisoners.disguiseAs;
   const effectivePrisonerClass = disguiseAs || prisonerClass;
+  const prisonerStance = state.choices.prisoners.stance || 'standard';
+  const guardStance = state.choices.guards.stance || 'standard';
 
   markUsed(state, 'prisoners', prisonerClass);
   markUsed(state, 'guards', guardClass);
   if (disguiseAs) state.pending.disguiseTokens = Math.max(0, state.pending.disguiseTokens - 1);
 
+  // Aggressive is a self-imposed lock: the class played is out for the next two rounds instead
+  // of one, win or lose - same mechanism Riot uses to lock an opponent's class, just applied to
+  // your own here.
+  if (prisonerStance === 'aggressive') state.prisonerClasses[prisonerClass].forcedFatiguedUntilRound = state.round + 2;
+  if (guardStance === 'aggressive') state.guardClasses[guardClass].forcedFatiguedUntilRound = state.round + 2;
+
   const winner = resolveBattle(effectivePrisonerClass, guardClass);
+
+  // Guards' Cautious: losing doesn't cost you the usual Fatigue - stay available next round.
+  if (winner === 'prisoners' && guardStance === 'cautious') {
+    state.guardClasses[guardClass].willBeFatigued = false;
+  }
 
   const logEntry = {
     round: state.round,
     prisonerClass,
     guardClass,
     disguiseAs,
+    prisonerStance,
+    guardStance,
     winner,
     escapeCardsRevealed: [],
   };
 
   if (winner === 'guards') {
-    state.prisonerClasses[prisonerClass].remaining -= 1;
-    logEntry.prisonerDiscarded = prisonerClass;
-    if (state.prisonerClasses[prisonerClass].remaining <= 0) {
-      state.winner = 'guards';
-      state.status = 'finished';
-      logEntry.eliminatedClass = prisonerClass;
-      state.log.push(logEntry);
-      return;
+    // Cautious (either side) protects the Prisoner from being discarded this battle - it's only
+    // Fatigued as normal, same as if they'd won.
+    const discardPrevented = prisonerStance === 'cautious' || guardStance === 'cautious';
+
+    if (!discardPrevented) {
+      state.prisonerClasses[prisonerClass].remaining -= 1;
+      logEntry.prisonerDiscarded = prisonerClass;
+      if (state.prisonerClasses[prisonerClass].remaining <= 0) {
+        state.winner = 'guards';
+        state.status = 'finished';
+        logEntry.eliminatedClass = prisonerClass;
+        state.log.push(logEntry);
+        return;
+      }
+    } else {
+      logEntry.discardPrevented = true;
+    }
+
+    // Guards' Aggressive bonus: also discard one copy of whichever *other* surviving class is
+    // weakest, independent of whether the primary discard above happened.
+    if (guardStance === 'aggressive') {
+      const otherSurviving = PRISONER_CLASSES.filter((c) => c !== prisonerClass && state.prisonerClasses[c].remaining > 0);
+      if (otherSurviving.length > 0) {
+        const target = otherSurviving.reduce((min, c) => (state.prisonerClasses[c].remaining < state.prisonerClasses[min].remaining ? c : min));
+        state.prisonerClasses[target].remaining -= 1;
+        logEntry.aggressiveBonusDiscard = target;
+        if (state.prisonerClasses[target].remaining <= 0) {
+          state.winner = 'guards';
+          state.status = 'finished';
+          logEntry.eliminatedClass = target;
+          state.log.push(logEntry);
+          return;
+        }
+      }
     }
   }
 
@@ -164,6 +211,10 @@ function resolveRound(state) {
       const modifier = state.pending.revealModifiers.shift();
       revealCount = modifier === 'lockdown' ? 0 : 2; // 'smuggled_tools' => 2
     }
+    // Aggressive adds an extra reveal on top of whatever the modifier queue already granted;
+    // Cautious overrides to zero regardless - safety has a price.
+    if (prisonerStance === 'aggressive') revealCount += 1;
+    if (prisonerStance === 'cautious') revealCount = 0;
     if (continueReveals(state, logEntry, revealCount)) return; // game over or paused for event input
   }
 
@@ -409,6 +460,7 @@ export function publicState(state, forSide) {
     pendingEventInput: state.pendingEventInput && state.pendingEventInput.chooser === forSide ? state.pendingEventInput : (state.pendingEventInput ? { type: state.pendingEventInput.type, chooser: state.pendingEventInput.chooser } : null),
     myChoiceSubmitted: !!state.choices[forSide],
     myChoice: state.choices[forSide] ? state.choices[forSide].unitClass : null,
+    myStance: state.choices[forSide] ? state.choices[forSide].stance : null,
     opponentChoiceSubmitted: !!state.choices[otherSide(forSide)],
     mySwapSubmitted: state.swap[forSide] !== undefined,
     opponentConnected: !!state.players[otherSide(forSide)]?.connected,
